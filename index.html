@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>twitter</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="https://cdn.rawgit.com/urin/jquery.balloon.js/master/jquery.balloon.js"></script>
+</head>
+<body>
+
+  <script>
+  $(function() {
+    var socket = io.connect();
+    $('form').submit(function() {
+      socket.emit('msg', $('input').val());
+      $('input').val('');
+      return false;
+    });
+
+    var count = 0;
+    socket.on('msg', function(data) {
+      count += 1;
+      console.log(count)
+      var user = data.user
+      var src = "<img src=" + user.profile_image_url + " id = "+ user.id + ">";
+      var follower = user.followers_count
+      var radius = 0;
+      if (follower < 100) {
+        radius = 50;
+      } else if(follower < 300){
+        radius = 70;
+      } else {
+        radius = 90
+      }
+
+      var rand_w = Math.floor(Math.random() * $(window).width())
+      var rand_h = Math.floor(Math.random() * $(window).height())
+
+      $('#main').append(src)
+      $('#'+user.id)
+              .css('position', 'absolute')
+              .css('left', rand_w)
+              .css('top', rand_h)
+              .wrap('<a href="https://twitter.com/' + user.screen_name + '" target="_blank"></a>')
+      $('#'+user.id).balloon({
+        contents: data.text
+      })
+
+      // console.log(user.time_zone)
+      // console.log(user.user)
+      // $('div').prepend(src + follower + '<br>')
+      //         .find('img')
+      //         .wrap('<a href="https://twitter.com/' + user.screen_name + '" target="_blank"></a>')
+
+      $('#'+user.id).css('width', radius + 'px')
+                    .css('border-radius', '50%');
+
+    });
+  });
+  </script>
+  <!-- <form><input></form> -->
+  <div id='overlay'></div>
+  <div id='main'></div>
+</body>
+</html>
