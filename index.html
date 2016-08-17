@@ -4,14 +4,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title>twitter</title>
+	<link rel="stylesheet" href="./css/style.css" type="text/css" />
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="https://cdn.rawgit.com/urin/jquery.balloon.js/master/jquery.balloon.js"></script>
 </head>
 <body>
 
-	<script>
-	$(function() {
+<script>
+$(function() {
 	var socket = io.connect();
 	$('form').submit(function() {
 		socket.emit('msg', $('input').val());
@@ -21,6 +22,7 @@
 
 	var count = 0;
 	socket.on('msg', function(data) {
+		outer(data)
 		count += 1;
 		var user = data.user
 		var src = "<img src=" + user.profile_image_url + " id = "+ user.id + ">";
@@ -50,20 +52,34 @@
 		contents: data.text
 		})
 
-		// console.log(user.time_zone)
-		// console.log(user.user)
-		// $('div').prepend(src + follower + '<br>')
-		//	 .find('img')
-		//	 .wrap('<a href="https://twitter.com/' + user.screen_name + '" target="_blank"></a>')
-
 		$('#'+user.id).css('width', radius + 'px')
 					.css('border-radius', '50%');
-
 	});
-	});
-	</script>
-	<!-- <form><input></form> -->
-	<div id='overlay'></div>
-	<div id='main'></div>
+	
+	function outer(data){
+		var int = setInterval(function(){
+			socket.off()
+			$('#modal-trigger').attr('checked', 'checked')
+		}, 5000)
+		
+		var speed = count / 5;
+		$('h1.title').text(data.keyword + ' の風速！');
+		$('h2.speed').text(speed + ' tweets/秒');
+	}
+});
+</script>
+<!-- <form><input></form> -->
+<!-- <div id='overlay'></div> -->
+<div class="modal">
+	<input id="modal-trigger" type="checkbox">
+	<div class="modal-overlay">
+		<div class="modal-wrap">
+			<h1 class='title'></h1>
+			<h2 class='speed'></h2>
+			<label for="modal-trigger">とじる</label>
+		</div>
+	</div>
+</div>
+<div id='main'></div>
 </body>
 </html>
