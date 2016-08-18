@@ -18,9 +18,10 @@
 
 .modal-wrap {
 	position: relative;
-	margin: 50% auto 0 0;
+	margin: auto;
 	width: 100%;
 	color: #fff;
+	margin-top: 30%;
 }
 
 .modal-wrap label {
@@ -33,7 +34,7 @@
 	border-radius: 2px;
 }
 
-input {
+input#modal-trigger {
 	position: absolute;
 	z-index: -9999;
 	visibility: hidden;

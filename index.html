@@ -15,61 +15,71 @@
 $(function() {
 	var socket = io.connect();
 	$('form').submit(function() {
-		socket.emit('msg', $('input').val());
-		$('input').val('');
+		socket.emit('msg', $('.query').val());
+		$('.query').val('');
 		return false;
 	});
 
 	var count = 0;
 	socket.on('msg', function(data) {
-		outer(data)
+		showOverLay(data)
 		count += 1;
-		var user = data.user
-		var src = "<img src=" + user.profile_image_url + " id = "+ user.id + ">";
-		var follower = user.followers_count
+
+		radius = getRadius(data)
+		drawAccounts(data, radius)
+
+	});
+
+	function getRadius(data) {
+		var follower = data.user.followers_count;
 		var radius = 0;
+
 		if (follower < 100) {
-		radius = 50;
+			return follower;
 		} else if(follower < 300){
-		radius = 70;
+			return follower * 0.6;
 		} else {
-		radius = 90
+			return 90
 		}
+	}
+
+	function drawAccounts(data, r) {
+		var user = data.user
+		var html = "<img src=" + user.profile_image_url + " id = "+ user.id + data.timestamp_ms +">";
+		$('#main').append(html)
 
 		var rand_w = Math.floor(Math.random() * $(window).width())
 		var rand_h = Math.floor(Math.random() * $(window).height())
 
-		$('#main').append(src)
-		$('#'+user.id)
-				.css('position', 'absolute')
-				.css('left', rand_w)
-				.css('top', rand_h)
+		$user_img = $('#' + user.id + data.timestamp_ms);
+		$user_img.css({'position': 'absolute',
+							'left': rand_w,
+							'top': rand_h,
+							'width': r + 'px',
+							'border-radius': '50%'
+						})
 				.wrap('<a href="https://twitter.com/' + user.screen_name + '" target="_blank"></a>')
-		$('#'+user.id).balloon({
-		showDuration: "slow",
-		showAnimation: function(d, c) { this.fadeIn(d, c); },
-		css: { width: '200px' },
-		contents: data.text
-		})
+				.balloon({
+					showDuration: "slow",
+					showAnimation: function(d, c) { this.fadeIn(d, c); },
+					css: { width: '200px' },
+					contents: data.text
+				})
+	}
 
-		$('#'+user.id).css('width', radius + 'px')
-					.css('border-radius', '50%');
-	});
-	
-	function outer(data){
+	function showOverLay(data) {
 		var int = setInterval(function(){
-			socket.off()
-			$('#modal-trigger').attr('checked', 'checked')
-		}, 5000)
-		
+						socket.off()
+						$('#modal-trigger').attr('checked', 'checked')
+					}, 5000)
+
 		var speed = count / 5;
 		$('h1.title').text(data.keyword + ' の風速！');
 		$('h2.speed').text(speed + ' tweets/秒');
 	}
 });
 </script>
-<!-- <form><input></form> -->
-<!-- <div id='overlay'></div> -->
+
 <div class="modal">
 	<input id="modal-trigger" type="checkbox">
 	<div class="modal-overlay">
@@ -80,6 +90,9 @@ $(function() {
 		</div>
 	</div>
 </div>
-<div id='main'></div>
+<div id='main'>
+
+</div>
+
 </body>
 </html>
