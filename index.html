@@ -10,7 +10,11 @@
 	<script src="https://cdn.rawgit.com/urin/jquery.balloon.js/master/jquery.balloon.js"></script>
 </head>
 <body>
-
+<div class='action_area'>
+	<input id="speed" type="checkbox">
+	<label for="speed" class='measure'>風速を計測！</label>
+</div>
+<div id='main'>
 <script>
 $(function() {
 	var socket = io.connect();
@@ -22,20 +26,32 @@ $(function() {
 
 	var count = 0;
 	socket.on('msg', function(data) {
-		showOverLay(data)
 		count += 1;
+
+		if ( $("#speed").prop('checked') ) { 
+			$('.measure').text('計測中...')
+			showOverLay(data)
+		}
+		addEvents();
 
 		radius = getRadius(data)
 		drawAccounts(data, radius)
 
 	});
 
+	function addEvents() {
+
+		$('.reload').on('click', function(){
+			window.location.reload()
+		})
+	}
+
 	function getRadius(data) {
 		var follower = data.user.followers_count;
 		var radius = 0;
 
 		if (follower < 100) {
-			return follower;
+			return 60;
 		} else if(follower < 300){
 			return follower * 0.6;
 		} else {
@@ -54,7 +70,7 @@ $(function() {
 		$user_img = $('#' + user.id + data.timestamp_ms);
 		$user_img.css({'position': 'absolute',
 							'left': rand_w,
-							'top': rand_h,
+							'top': rand_h + 50,
 							'width': r + 'px',
 							'border-radius': '50%'
 						})
@@ -69,13 +85,17 @@ $(function() {
 
 	function showOverLay(data) {
 		var int = setInterval(function(){
-						socket.off()
 						$('#modal-trigger').attr('checked', 'checked')
+						socket.off()
 					}, 5000)
-
-		var speed = count / 5;
+		if(!$('#modal-trigger').prop('checked')){
+			$('.measure').addClass('reload')
+						.text('更 新')
+		}
+		var speed = count / 5 * 1000;
 		$('h1.title').text(data.keyword + ' の風速！');
-		$('h2.speed').text(speed + ' tweets/秒');
+		$('h2.speed').text(speed + ' tweets/ms');
+
 	}
 });
 </script>
@@ -90,7 +110,7 @@ $(function() {
 		</div>
 	</div>
 </div>
-<div id='main'>
+
 
 </div>
 
