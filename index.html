@@ -25,25 +25,26 @@ $(function() {
 	});
 
 	var count = 0;
-	socket.on('msg', function(data) {
-		count += 1;
+	start()
+	function start(){
+		socket.on('msg', function(data) {
+			count += 1;
 
-		if ( $("#speed").prop('checked') ) { 
-			$('.measure').text('計測中...')
-			showOverLay(data)
-		}
-		addEvents();
+			if ( $("#speed").prop('checked') ) { 
+				$('.measure').text('計測中...')
+				showOverLay(data, function(){
+					$('.measure').addClass('reload').text('更新')
+					$('.reload').on('click', function(){
+						window.location.reload()
+					})
+				})
+			}
 
-		radius = getRadius(data)
-		drawAccounts(data, radius)
+			radius = getRadius(data)
+			drawAccounts(data, radius)
 
-	});
-
-	function addEvents() {
-
-		$('.reload').on('click', function(){
-			window.location.reload()
-		})
+		});
+		
 	}
 
 	function getRadius(data) {
@@ -83,19 +84,15 @@ $(function() {
 				})
 	}
 
-	function showOverLay(data) {
+	function showOverLay(data, cb) {
 		var int = setInterval(function(){
-						$('#modal-trigger').attr('checked', 'checked')
 						socket.off()
-					}, 5000)
-		if(!$('#modal-trigger').prop('checked')){
-			$('.measure').addClass('reload')
-						.text('更 新')
-		}
+						$('#modal-trigger').attr('checked', 'checked')
+						cb()
+					}, 5000, cb)
 		var speed = count / 5 * 1000;
 		$('h1.title').text(data.keyword + ' の風速！');
 		$('h2.speed').text(speed + ' tweets/ms');
-
 	}
 });
 </script>
